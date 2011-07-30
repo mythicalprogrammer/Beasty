@@ -1,0 +1,289 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<XnaContent xmlns:Pipeline="Microsoft.Xna.Framework.Content.Pipeline" xmlns:Graphics="Microsoft.Xna.Framework.Graphics" xmlns:Processors="Microsoft.Xna.Framework.Content.Pipeline.Processors">
+  <Asset Type="Pipeline:BuildItemCollection">
+    <Item>
+      <Source>models\giraff.fbx</Source>
+      <Name>models\giraff</Name>
+      <Importer>FbxImporter</Importer>
+      <Processor>ModelProcessor</Processor>
+      <Options>None</Options>
+      <Output>C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\models\giraff.xnb</Output>
+      <Time>2009-06-09T23:17:54.625-07:00</Time>
+      <Dependency>
+        <Key>obj\x86\Release\models\giraff_0.xml</Key>
+        <Value>2009-06-27T14:46:30.296875-07:00</Value>
+      </Dependency>
+      <Request>C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\textures\Fur 004_0.xnb</Request>
+    </Item>
+    <Item>
+      <Source>models\p1_wedge.fbx</Source>
+      <Name>models\p1_wedge</Name>
+      <Importer>FbxImporter</Importer>
+      <Processor>ModelProcessor</Processor>
+      <Options>None</Options>
+      <Output>C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\models\p1_wedge.xnb</Output>
+      <Time>2009-06-23T16:06:21.359375-07:00</Time>
+      <Dependency>
+        <Key>obj\x86\Release\models\p1_wedge_0.xml</Key>
+        <Value>2009-06-27T14:46:32.921875-07:00</Value>
+      </Dependency>
+      <Request>C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\textures\wedge_p1_diff_v1_0.xnb</Request>
+    </Item>
+    <Item>
+      <Source>models\turtle2.fbx</Source>
+      <Name>models\turtle2</Name>
+      <Importer>FbxImporter</Importer>
+      <Processor>ModelProcessor</Processor>
+      <Options>None</Options>
+      <Output>C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\models\turtle2.xnb</Output>
+      <Time>2009-06-23T21:53:29.203125-07:00</Time>
+      <Dependency>
+        <Key>obj\x86\Release\models\turtle2_0.xml</Key>
+        <Value>2009-06-27T14:46:33.28125-07:00</Value>
+      </Dependency>
+    </Item>
+    <Item>
+      <Source>msg.spritefont</Source>
+      <Name>msg</Name>
+      <Importer>FontDescriptionImporter</Importer>
+      <Processor>FontDescriptionProcessor</Processor>
+      <Options>None</Options>
+      <Output>C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\msg.xnb</Output>
+      <Time>2009-06-26T16:24:51.265625-07:00</Time>
+    </Item>
+    <Item>
+      <Source>models\hairship.X</Source>
+      <Name>models\hairship</Name>
+      <Importer>XImporter</Importer>
+      <Processor>ModelProcessor</Processor>
+      <Options>None</Options>
+      <Output>C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\models\hairship.xnb</Output>
+      <Time>2009-06-26T16:24:50.546875-07:00</Time>
+      <Dependency>
+        <Key>obj\x86\Release\models\hairship_0.xml</Key>
+        <Value>2009-06-27T14:46:33.609375-07:00</Value>
+      </Dependency>
+    </Item>
+    <Item>
+      <Source>models\box.X</Source>
+      <Name>models\box</Name>
+      <Importer>XImporter</Importer>
+      <Processor>ModelProcessor</Processor>
+      <Options>None</Options>
+      <Output>C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\models\box.xnb</Output>
+      <Time>2009-06-26T16:24:50.546875-07:00</Time>
+      <Dependency>
+        <Key>obj\x86\Release\models\box_0.xml</Key>
+        <Value>2009-06-27T14:46:33.6875-07:00</Value>
+      </Dependency>
+    </Item>
+    <Item>
+      <Source>models\pigeon.X</Source>
+      <Name>models\pigeon</Name>
+      <Importer>XImporter</Importer>
+      <Processor>ModelProcessor</Processor>
+      <Options>None</Options>
+      <Output>C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\models\pigeon.xnb</Output>
+      <Time>2009-06-27T14:46:18.734375-07:00</Time>
+      <Dependency>
+        <Key>obj\x86\Release\models\pigeon_0.xml</Key>
+        <Value>2009-06-27T14:46:33.765625-07:00</Value>
+      </Dependency>
+    </Item>
+    <Item>
+      <Source>models\giraff.fbx</Source>
+      <Importer>FbxImporter</Importer>
+      <Options>IntermediateFile, DontCacheImportedData</Options>
+      <Output>obj\x86\Release\models\giraff_0.xml</Output>
+      <Time>2009-06-09T23:17:54.625-07:00</Time>
+    </Item>
+    <Item>
+      <Source>textures\Fur 004.jpg</Source>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Parameters>
+        <Data Key="ColorKeyColor" Type="Graphics:Color">FFFF00FF</Data>
+        <Data Key="ColorKeyEnabled" Type="bool">true</Data>
+        <Data Key="TextureFormat" Type="Processors:TextureProcessorOutputFormat">DxtCompressed</Data>
+        <Data Key="GenerateMipmaps" Type="bool">true</Data>
+        <Data Key="ResizeToPowerOfTwo" Type="bool">false</Data>
+      </Parameters>
+      <Options>None</Options>
+      <Output>C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\textures\Fur 004_0.xnb</Output>
+      <Time>2009-06-09T22:17:42.359375-07:00</Time>
+    </Item>
+    <Item>
+      <Source>models\p1_wedge.fbx</Source>
+      <Importer>FbxImporter</Importer>
+      <Options>IntermediateFile, DontCacheImportedData</Options>
+      <Output>obj\x86\Release\models\p1_wedge_0.xml</Output>
+      <Time>2009-06-23T16:06:21.359375-07:00</Time>
+    </Item>
+    <Item>
+      <Source>textures\wedge_p1_diff_v1.tga</Source>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Parameters>
+        <Data Key="ColorKeyColor" Type="Graphics:Color">FFFF00FF</Data>
+        <Data Key="ColorKeyEnabled" Type="bool">true</Data>
+        <Data Key="TextureFormat" Type="Processors:TextureProcessorOutputFormat">DxtCompressed</Data>
+        <Data Key="GenerateMipmaps" Type="bool">true</Data>
+        <Data Key="ResizeToPowerOfTwo" Type="bool">false</Data>
+      </Parameters>
+      <Options>None</Options>
+      <Output>C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\textures\wedge_p1_diff_v1_0.xnb</Output>
+      <Time>2009-06-23T16:06:21.546875-07:00</Time>
+    </Item>
+    <Item>
+      <Source>models\turtle2.fbx</Source>
+      <Importer>FbxImporter</Importer>
+      <Options>IntermediateFile, DontCacheImportedData</Options>
+      <Output>obj\x86\Release\models\turtle2_0.xml</Output>
+      <Time>2009-06-23T21:53:29.203125-07:00</Time>
+    </Item>
+    <Item>
+      <Source>models\hairship.X</Source>
+      <Importer>XImporter</Importer>
+      <Options>IntermediateFile, DontCacheImportedData</Options>
+      <Output>obj\x86\Release\models\hairship_0.xml</Output>
+      <Time>2009-06-26T16:24:50.546875-07:00</Time>
+    </Item>
+    <Item>
+      <Source>models\box.X</Source>
+      <Importer>XImporter</Importer>
+      <Options>IntermediateFile, DontCacheImportedData</Options>
+      <Output>obj\x86\Release\models\box_0.xml</Output>
+      <Time>2009-06-26T16:24:50.546875-07:00</Time>
+    </Item>
+    <Item>
+      <Source>models\pigeon.X</Source>
+      <Importer>XImporter</Importer>
+      <Options>IntermediateFile, DontCacheImportedData</Options>
+      <Output>obj\x86\Release\models\pigeon_0.xml</Output>
+      <Time>2009-06-27T14:46:18.734375-07:00</Time>
+    </Item>
+    <Item>
+      <Source>particles\explosion.png</Source>
+      <Name>particles\explosion</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\particles\explosion.xnb</Output>
+      <Time>2009-06-29T17:31:45.140625-07:00</Time>
+    </Item>
+    <Item>
+      <Source>particles\explosionEffect.fx</Source>
+      <Name>particles\explosionEffect</Name>
+      <Importer>EffectImporter</Importer>
+      <Processor>EffectProcessor</Processor>
+      <Options>None</Options>
+      <Output>C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\particles\explosionEffect.xnb</Output>
+      <Time>2008-01-04T10:38:18-08:00</Time>
+    </Item>
+    <Item>
+      <Source>models\bullet.X</Source>
+      <Name>models\bullet</Name>
+      <Importer>XImporter</Importer>
+      <Processor>ModelProcessor</Processor>
+      <Options>None</Options>
+      <Output>C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\models\bullet.xnb</Output>
+      <Time>2009-06-29T20:47:48.953125-07:00</Time>
+      <Dependency>
+        <Key>obj\x86\Release\models\bullet_0.xml</Key>
+        <Value>2009-06-29T20:48:58.59375-07:00</Value>
+      </Dependency>
+    </Item>
+    <Item>
+      <Source>models\bullet.X</Source>
+      <Importer>XImporter</Importer>
+      <Options>IntermediateFile, DontCacheImportedData</Options>
+      <Output>obj\x86\Release\models\bullet_0.xml</Output>
+      <Time>2009-06-29T20:47:48.953125-07:00</Time>
+    </Item>
+    <Item>
+      <Source>textures\particles\explosion.png</Source>
+      <Name>textures\particles\explosion</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\textures\particles\explosion.xnb</Output>
+      <Time>2007-11-26T11:33:18-08:00</Time>
+    </Item>
+    <Item>
+      <Source>textures\particles\fire.png</Source>
+      <Name>textures\particles\fire</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\textures\particles\fire.xnb</Output>
+      <Time>2007-11-26T11:33:18-08:00</Time>
+    </Item>
+    <Item>
+      <Source>textures\particles\smoke.png</Source>
+      <Name>textures\particles\smoke</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\textures\particles\smoke.xnb</Output>
+      <Time>2007-11-26T11:33:18-08:00</Time>
+    </Item>
+    <Item>
+      <Source>textures\particles\ParticleEffect.fx</Source>
+      <Name>textures\particles\ParticleEffect</Name>
+      <Importer>EffectImporter</Importer>
+      <Processor>EffectProcessor</Processor>
+      <Options>None</Options>
+      <Output>C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\textures\particles\ParticleEffect.xnb</Output>
+      <Time>2007-12-06T08:21:40-08:00</Time>
+    </Item>
+    <Item>
+      <Source>land\test1.bmp</Source>
+      <Name>land\test1</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <Options>None</Options>
+      <Output>C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\land\test1.xnb</Output>
+      <Time>2009-09-23T11:05:46.859375-07:00</Time>
+    </Item>
+    <BuildSuccessful>true</BuildSuccessful>
+    <Settings>
+      <TargetPlatform>Windows</TargetPlatform>
+      <BuildConfiguration>Release</BuildConfiguration>
+      <CompressContent>true</CompressContent>
+      <RootDirectory>C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\Content\</RootDirectory>
+      <LoggerRootDirectory>C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\</LoggerRootDirectory>
+      <IntermediateDirectory>C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\Content\obj\x86\Release\</IntermediateDirectory>
+      <OutputDirectory>C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\</OutputDirectory>
+    </Settings>
+    <Assemblies>
+      <Assembly>
+        <Key>C:\Program Files\Microsoft XNA\XNA Game Studio\v3.1\References\Windows\x86\Microsoft.Xna.Framework.Content.Pipeline.XImporter.dll</Key>
+        <Value>2009-05-28T00:16:14-07:00</Value>
+      </Assembly>
+      <Assembly>
+        <Key>C:\Program Files\Microsoft XNA\XNA Game Studio\v3.1\References\Windows\x86\Microsoft.Xna.Framework.Content.Pipeline.VideoImporters.dll</Key>
+        <Value>2009-05-28T00:16:06-07:00</Value>
+      </Assembly>
+      <Assembly>
+        <Key>C:\Program Files\Microsoft XNA\XNA Game Studio\v3.1\References\Windows\x86\Microsoft.Xna.Framework.Content.Pipeline.TextureImporter.dll</Key>
+        <Value>2009-05-28T00:16:16-07:00</Value>
+      </Assembly>
+      <Assembly>
+        <Key>C:\Program Files\Microsoft XNA\XNA Game Studio\v3.1\References\Windows\x86\Microsoft.Xna.Framework.Content.Pipeline.FBXImporter.dll</Key>
+        <Value>2009-05-28T00:16:26-07:00</Value>
+      </Assembly>
+      <Assembly>
+        <Key>C:\Program Files\Microsoft XNA\XNA Game Studio\v3.1\References\Windows\x86\Microsoft.Xna.Framework.Content.Pipeline.EffectImporter.dll</Key>
+        <Value>2009-05-28T00:16:12-07:00</Value>
+      </Assembly>
+      <Assembly>
+        <Key>C:\Program Files\Microsoft XNA\XNA Game Studio\v3.1\References\Windows\x86\Microsoft.Xna.Framework.Content.Pipeline.AudioImporters.dll</Key>
+        <Value>2009-05-28T00:16:06-07:00</Value>
+      </Assembly>
+      <Assembly>
+        <Key>C:\WINDOWS\assembly\GAC_32\Microsoft.Xna.Framework.Content.Pipeline\3.1.0.0__6d5c3888ef60e27d\Microsoft.Xna.Framework.Content.Pipeline.dll</Key>
+        <Value>2009-06-16T23:15:01.265625-07:00</Value>
+      </Assembly>
+    </Assemblies>
+  </Asset>
+</XnaContent>

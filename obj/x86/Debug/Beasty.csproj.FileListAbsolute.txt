@@ -1,0 +1,11 @@
+C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Debug\Content\models\giraff.xnb
+C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Debug\Content\textures\Fur 004_0.xnb
+C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Debug\Beasty.exe
+C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Debug\Beasty.pdb
+C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\obj\x86\Debug\Microsoft.Xna.Framework.RuntimeProfile.txt
+C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\obj\x86\Debug\Beasty.exe
+C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\obj\x86\Debug\Beasty.pdb
+C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Debug\Content\models\p1_wedge.xnb
+C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Debug\Content\textures\wedge_p1_diff_v1_0.xnb
+C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Debug\Content\models\turtle2.xnb

@@ -1,0 +1,23 @@
+C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\obj\x86\Release\ResolveAssemblyReference.cache
+C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\obj\x86\Release\Microsoft.Xna.Framework.RuntimeProfile.txt
+C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\models\giraff.xnb
+C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\models\p1_wedge.xnb
+C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\models\turtle2.xnb
+C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\msg.xnb
+C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\models\hairship.xnb
+C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\models\box.xnb
+C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\models\pigeon.xnb
+C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\textures\Fur 004_0.xnb
+C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\textures\wedge_p1_diff_v1_0.xnb
+C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Beasty.exe
+C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Beasty.pdb
+C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\obj\x86\Release\Beasty.exe
+C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\obj\x86\Release\Beasty.pdb
+C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\particles\explosion.xnb
+C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\particles\explosionEffect.xnb
+C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\models\bullet.xnb
+C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\textures\particles\explosion.xnb
+C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\textures\particles\fire.xnb
+C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\textures\particles\smoke.xnb
+C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\textures\particles\ParticleEffect.xnb
+C:\Documents and Settings\hope13\My Documents\game project\Beasty\Beasty\bin\x86\Release\Content\land\test1.xnb

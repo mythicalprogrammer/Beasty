@@ -1,0 +1,250 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+
+namespace Beasty
+{
+    public enum Facing {
+        Left, Right
+    }
+
+    public class BaseUnit
+    {
+        // factory used to create projectiles.
+        protected AbstractUnitFactory factory = null;
+
+        private Facing facing { get; set; }
+        protected float scale = 1f;
+
+//        private List<Weapon> weapons = new List<Weapon>();
+        private List<Enhancement> enhancements = new List<Enhancement>();
+
+        private Model _body;
+        protected Vector2 _position = new Vector2();
+        protected Vector2 _velocity = new Vector2();
+        protected int _energy = 0;
+        protected int _life = 0;
+
+        private Model aimerModel;
+
+        // Where the aimer is located
+        private Vector2[] aimerPosition = new Vector2[3] { new Vector2(100f, 100f), new Vector2(50f, 50f), new Vector2(400f, 400f) };
+
+        // these angle and powers are set as { current, min, max } values
+        //private float[] aimerAngle = new float[3] { (float)Math.PI / 4, 0f, (float)Math.PI / 2};
+        //private float[] aimerPower = new float[3] { 200f, 100f, 1000f };
+
+        public Vector2 position
+        {
+            get { return _position; }
+        }
+        public Vector2 velocity
+        {
+            get { return _velocity; }
+        }
+        public int energy
+        {
+            get { return _energy; }
+        }
+        public int life
+        {
+            get { return _life; }
+        }
+
+        public BaseUnit(
+            AbstractUnitFactory factory,
+            int def_energy, 
+            int def_life, 
+            Model def_body, 
+            Model def_aimer, 
+            Vector2 startPosition) 
+        {
+            this.factory = factory;
+
+            this._energy = def_energy;
+            this._life = def_life;
+            this._body = def_body;
+
+            // deep copy (is there a better way?)
+            this._position.X = startPosition.X;
+            this._position.Y = startPosition.Y;
+
+            // aimerModel is created.
+            this.aimerModel = def_aimer;
+        }
+
+        public void Move(Vector2 ForceDirection)
+        {
+            if (_energy > 0)
+            {
+                // TODO: i think this physics is fucked.
+                // this is not proper physics! doods.
+                Vector2 accel = new Vector2(
+                    ForceDirection.X / 5, ForceDirection.Y / 5);
+
+                // change the direction of ship only
+                // when the user moves it.
+                if (accel.X != 0)
+                {
+                    this.facing = (accel.X > 0) ? Facing.Right : Facing.Left;
+                }
+
+                // acceleration is added to _velocity
+                this._velocity += accel;
+                _energy -= (int) ForceDirection.Length();
+            }
+        }
+
+        public void Fire()
+        {
+            if (_energy > 0)
+            {
+                // creates a projectile!
+                factory.CreateProjectile(UnitType.Bullet, _position, aimerPosition[0]/10);
+                _energy -= (int)aimerPosition[0].Length();
+            }
+        }
+
+        protected virtual void hitWall()
+        {
+        }
+
+        // updates a time step (applies the _velocity)
+        internal void Update(GameTime gameTime)
+        {
+            // Air FRICTION!
+            this._velocity.X /= 1.001f;
+            this._velocity.Y /= 1.001f;
+
+            // Gravity
+            this._velocity.Y -= 0.1f;
+
+            // Floor collision
+            if (this._position.Y < 0)
+            {
+                // ground friction
+                this._velocity.X /= 1.05f;
+                this._velocity.Y *= -0.5f;
+                this._position.Y *= -1f;
+                hitWall();
+            }
+
+            // Sidewall collision
+            if (Math.Abs(_position.X) > 5000)
+            {
+                this._velocity.X *= -0.75f;
+                if (_position.X > 5000)
+                {
+                    this._position.X = 4995f;
+                }
+                else
+                {
+                    this._position.X = -4995f;
+                }
+                hitWall();
+            }
+
+            // ceiling collision
+            if (_position.Y > 5000)
+            {
+                this._velocity.Y *= -0.75f;
+                this._position.Y = 5000f;
+            }
+
+            // unit movement is updated
+            this._position += this._velocity;
+
+            _energy += (int)gameTime.ElapsedRealTime.Milliseconds / 50;
+            // TODO: check if moved into other quadrant
+        }
+        
+        internal void Collide(BaseUnit other)
+        {
+            // try using p=mv to conserve momentum, mmmmkay?
+            Vector2 diff = other.position - this._position;
+            this._position -= diff;
+
+            this._velocity.X *= (float)-0.5;
+            this._velocity.Y *= (float)-0.5;
+        }
+
+        internal void Reset()
+        {
+            this._position.X = 0;
+            this._position.Y = 0;
+            this._velocity.X = 0;
+            this._velocity.Y = 0;
+        }
+
+        internal Rectangle getBound()
+        {
+            int width = (int) 200;
+            int height = (int) 50;
+            return new Rectangle(
+                (int) this._position.X - width / 2,
+                (int) this._position.Y - height / 2,
+                width, height);
+        }
+
+        public void Draw(Matrix projection, Matrix view)
+        {
+            // First, draw the base model
+            Vector3 modelPosition = new Vector3(this.position.X, this.position.Y, 0);
+            float modelRotation = (float)Math.PI / 2;
+
+            // check if we're facing left or right
+            if (this.facing == Facing.Right)
+            { modelRotation = -modelRotation; }
+
+            DrawModel(_body, projection, view, 
+                modelPosition, modelRotation, this.scale);
+
+            // draw the aimer.
+            if (aimerModel != null)
+            {
+                // float angle = aimerAngle[0];
+                // if (this.facing == Facing.Left)
+                // { angle = (float) Math.PI - aimerAngle[0]; }
+                // modelPosition += Vector3.Transform(new Vector3(aimerPower[0],0,0), Matrix.CreateRotationZ(angle));
+
+                modelPosition += new Vector3(aimerPosition[0], 0f);
+                DrawModel(this.aimerModel, projection, view, modelPosition, 0f, 1.0f);
+            }
+        }
+
+        private void DrawModel(
+            Model myModel, Matrix projection, Matrix view, 
+            Vector3 modelPosition, float modelRotation, float modelScale)
+        {
+            Matrix[] transforms = new Matrix[myModel.Bones.Count];
+            myModel.CopyAbsoluteBoneTransformsTo(transforms);
+
+            // Draw the model. A model can have multiple meshes, so loop.
+            foreach (ModelMesh mesh in myModel.Meshes)
+            {
+                // This is where the mesh orientation is set, as well as our camera and projection.
+                foreach (BasicEffect effect in mesh.Effects)
+                {
+                    effect.EnableDefaultLighting();
+                    
+                    // first apply the bone transform,
+                    // followed by the scale, rotation and finally translation
+                    // (order is important!)
+                    effect.World =
+                        transforms[mesh.ParentBone.Index]
+                        * Matrix.CreateScale(modelScale)
+                        * Matrix.CreateRotationY(modelRotation)
+                        * Matrix.CreateTranslation(modelPosition);
+
+                    effect.Projection = projection;
+                    effect.View = view; 
+                }
+                // Draw the mesh, using the effects set above.
+                mesh.Draw();
+            }
+        }
+
+    }
+}

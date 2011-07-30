@@ -1,0 +1,731 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.GamerServices;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
+using Microsoft.Xna.Framework.Net;
+using Microsoft.Xna.Framework.Storage;
+using Beasty.Land;
+using Beasty.Units;
+
+namespace Beasty
+{
+    // states the game can be in
+    public enum BeastyStates
+    {
+        Menu, Normal, Paused
+    };
+
+
+    /// <summary>
+    /// This is the main type for your game
+    /// </summary>
+    public class Core : Microsoft.Xna.Framework.Game
+    {
+<<<<<<< .mine
+        #region Properties Toon Shading
+
+
+
+        Beasty.ToonShading.FreeCamera camera;
+
+        RenderTarget2D sceneTarget;
+        RenderTarget2D normalDepthAlphaTarget;
+
+        Effect renderEffect;
+        Effect postprocessEffect;
+
+        Texture2D lightIntensityTex;
+        Texture2D pencilTex;
+        Texture2D trooperTex;
+        Texture2D randNumbersTex;
+
+        Model trooper;
+
+        TimeSpan timeToChange;
+        double pencilVelocity;
+        float offset;
+        float vertexOffset;
+
+        int randDataSize;
+
+        FPSCounter fps;
+
+        bool renderGeometryEdges;
+        bool renderEdgeDetection;
+        bool renderCelShading;
+
+        KeyboardState prevState;
+
+        bool SM30Supported;
+
+        #endregion
+
+        GraphicsDevice device;
+        GraphicsDeviceManager graphics;
+        SpriteBatch spriteBatch;
+=======
+        private GraphicsDevice device;
+        private GraphicsDeviceManager graphics;
+        private SpriteBatch spriteBatch;
+        
+        // user messages
+        private Messages messages;
+>>>>>>> .r65
+
+<<<<<<< .mine
+#region ParticleSystem Field
+        //ParticleSystem
+        ParticleSystem explosionParticles;
+        ParticleSystem explosionSmokeParticles;
+        ParticleSystem projectileTrailParticles;
+        ParticleSystem smokePlumeParticles;
+        ParticleSystem fireParticles;
+
+        // The explosions effect works by firing projectiles up into the
+        // air, so we need to keep track of all the active projectiles.
+        List<Projectile> projectilesSystemList = new List<Projectile>();
+
+        TimeSpan timeToNextProjectile = TimeSpan.Zero;
+
+
+        // Random number generator for the fire effect.
+        //Random random = new Random();
+
+#endregion
+
+
+
+=======
+>>>>>>> .r65
+        // The aspect ratio determines how to scale 3d to 2d projection.
+        private float aspectRatio;
+
+        // The current state of the game
+        private BeastyStates state = BeastyStates.Normal;
+
+        // a list of controllers
+        private List<Controller> controllers = new List<Controller>();
+
+        // list of drawable units, projectiles, misc.
+        private List<BaseUnit> units = new List<BaseUnit>();
+        private List<BaseUnit> projectiles = new List<BaseUnit>();
+
+        // Grid and boundary
+        private DisplayGrid grid;       
+
+        // A shared random number generator
+        private static Random random = new Random();
+        public static Random Random
+        {
+            get { return random; }
+        }
+
+        // testing creation of land masses
+        private LandSample landtest;
+        
+        public Core()
+        {
+            graphics = new GraphicsDeviceManager(this);
+            //TODO double buffering
+<<<<<<< .mine
+           // graphics.PreferredBackBufferWidth = 853;
+          //  graphics.PreferredBackBufferHeight = 480;
+           // graphics.PreferMultiSampling = true;
+            //TOON SHADING
+            graphics.PreferMultiSampling = false;
+            this.IsFixedTimeStep = false;
+            graphics.SynchronizeWithVerticalRetrace = false;
+
+=======
+            graphics.PreferredBackBufferWidth = 1000;
+            graphics.PreferredBackBufferHeight = 500;
+            graphics.PreferMultiSampling = true;
+>>>>>>> .r65
+            /**
+            graphics.PreparingDeviceSettings +=
+                  new EventHandler<PreparingDeviceSettingsEventArgs>(
+                      graphics_PreparingDeviceSettings);
+            **/
+            Content.RootDirectory = "Content";
+
+            fps = new FPSCounter(this, "Toon Sketch Shader Demo");
+            Components.Add(fps);
+
+        }
+
+        #region Preparing for Anti-Aliasing
+        private void graphics_PreparingDeviceSettings(object sender, PreparingDeviceSettingsEventArgs e)
+        {
+            // Xbox 360 and most PCs support FourSamples/0 
+            // (4x) and TwoSamples/0 (2x) antialiasing.
+            PresentationParameters pp = e.GraphicsDeviceInformation.PresentationParameters;
+#if XBOX
+            pp.MultiSampleQuality = 0;
+            pp.MultiSampleType = MultiSampleType.FourSamples;
+            return;
+#else
+            int quality = 0;
+            GraphicsAdapter adapter = e.GraphicsDeviceInformation.Adapter;
+            SurfaceFormat format = adapter.CurrentDisplayMode.Format;
+            // Check for 4xAA
+            if (adapter.CheckDeviceMultiSampleType(DeviceType.Hardware, format,
+                false, MultiSampleType.FourSamples, out quality))
+            {
+                // even if a greater quality is returned, we only want quality 0
+                pp.MultiSampleQuality = 0;
+                pp.MultiSampleType =
+                    MultiSampleType.FourSamples;
+            }
+            // Check for 2xAA
+            else if (adapter.CheckDeviceMultiSampleType(DeviceType.Hardware,
+                format, false, MultiSampleType.TwoSamples, out quality))
+            {
+                // even if a greater quality is returned, we only want quality 0
+                pp.MultiSampleQuality = 0;
+                pp.MultiSampleType =
+                    MultiSampleType.TwoSamples;
+            }
+            return;
+#endif
+        }
+        #endregion
+
+        /// <summary>
+        /// Allows the game to perform any initialization it needs to before starting to run.
+        /// This is where it can query for any required services and load any non-graphic
+        /// related content.  Calling base.Initialize will enumerate through any components
+        /// and initialize them as well.
+        /// </summary>
+        protected override void Initialize()
+        {
+<<<<<<< .mine
+            #region ParticleSystem Initialize
+            // Construct our particle system components.
+            explosionParticles = new Beasty.ParticleSystems.ExplosionParticleSystem(this, Content);
+            explosionSmokeParticles = new Beasty.ParticleSystems.ExplosionSmokeParticleSystem(this, Content);
+            projectileTrailParticles = new Beasty.ParticleSystems.ProjectileTrailParticleSystem(this, Content);
+            smokePlumeParticles = new Beasty.ParticleSystems.SmokePlumeParticleSystem(this, Content);
+            fireParticles = new Beasty.ParticleSystems.FireParticleSystem(this, Content);
+
+            // Set the draw order so the explosions and fire
+            // will appear over the top of the smoke.
+            smokePlumeParticles.DrawOrder = 10;
+            explosionSmokeParticles.DrawOrder = 20;
+            projectileTrailParticles.DrawOrder = 30;
+            explosionParticles.DrawOrder = 40;
+            fireParticles.DrawOrder = 50;
+
+            // Register the particle system components.
+            Components.Add(explosionParticles);
+            Components.Add(explosionSmokeParticles);
+            Components.Add(projectileTrailParticles);
+            Components.Add(smokePlumeParticles);
+            Components.Add(fireParticles);
+            #endregion
+
+=======
+>>>>>>> .r65
+            #region Toon Shading Initialize
+            SM30Supported = graphics.GraphicsDevice.GraphicsDeviceCapabilities.MaxPixelShaderProfile == ShaderProfile.PS_3_0;
+
+            camera = new Beasty.ToonShading.FreeCamera(new Vector3(0, 100, 150));
+            camera.Lookat = Vector3.Zero;
+            camera.NearPlane = 1.0f;
+            camera.FarPlane = 1000f;
+            camera.Speed = 120f;
+            camera.TurnSpeed = 30;
+
+            pencilVelocity = 0.10;
+            timeToChange = TimeSpan.FromSeconds(pencilVelocity);
+            offset = 0.0f;
+            vertexOffset = 0.0f;
+            randDataSize = 16;
+
+            renderGeometryEdges = true;
+            renderEdgeDetection = true;
+            renderCelShading = true;
+            #endregion
+
+            device = graphics.GraphicsDevice;
+<<<<<<< .mine
+
+=======
+>>>>>>> .r65
+            base.Initialize();
+        }
+
+        /// <summary>
+        /// LoadContent will be called once per game and is the place to load
+        /// all of your content.
+        /// </summary>
+        /// 
+        protected override void LoadContent()
+        {
+            // Create a new sprite batch, this will be used to draw messages
+            spriteBatch = new SpriteBatch(GraphicsDevice);
+
+            aspectRatio = graphics.GraphicsDevice.Viewport.AspectRatio;
+
+<<<<<<< .mine
+            #region Toon Shading 
+            //trooper = Content.Load<Model>("Model/trooper/trooper");
+            trooper = Content.Load<Model>("models/hairship");
+            renderEffect = Content.Load<Effect>("Effect/Render");
+            postprocessEffect = Content.Load<Effect>("Effect/PostProcessing");
+
+            PresentationParameters pp = graphics.GraphicsDevice.PresentationParameters;
+
+            sceneTarget = new RenderTarget2D(graphics.GraphicsDevice,
+                pp.BackBufferWidth, pp.BackBufferHeight, 1,
+                pp.BackBufferFormat, pp.MultiSampleType, pp.MultiSampleQuality);
+
+            normalDepthAlphaTarget = new RenderTarget2D(graphics.GraphicsDevice,
+                pp.BackBufferWidth, pp.BackBufferHeight, 1,
+                pp.BackBufferFormat, pp.MultiSampleType, pp.MultiSampleQuality);
+
+            lightIntensityTex = new Texture2D(GraphicsDevice, 16, 1, 1, TextureUsage.None,
+                SurfaceFormat.Single);
+            float[] lightData = { 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 
+                0.9f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
+            lightIntensityTex.SetData<float>(lightData);
+
+            randNumbersTex = new Texture2D(GraphicsDevice, randDataSize, randDataSize, 1,
+                TextureUsage.None, SurfaceFormat.Single);
+            float[] randData = new float[randDataSize * randDataSize];
+            for (int i = 0; i < randDataSize * randDataSize; i++)
+            {
+                randData[i] = (float)random.NextDouble() - 0.5f;
+            }
+            randNumbersTex.SetData<float>(randData);
+
+            pencilTex = Content.Load<Texture2D>("textures/pencil");
+            
+            //skeleton_base = new CSkeletonBase(trooper);
+            //skeleton_base.setAnimation("idle");
+            #endregion
+
+            // Load font for messages
+            msgFont = this.Content.Load<SpriteFont>("msg");
+            msgFontPos = new Vector2(graphics.GraphicsDevice.Viewport.Width / 2,
+                graphics.GraphicsDevice.Viewport.Height / 2);
+=======
+            landtest = new LandSample(Content, spriteBatch);
+>>>>>>> .r65
+
+            messages = new Messages(Content, spriteBatch, device);
+
+            // TODO: Menu system for creating units
+
+            // creating our units.
+            AbstractUnitFactory factory = new ConcreteUnitFactory(Content, units, projectiles);
+            factory.CreateUnit(UnitType.Pigeon, new Vector2(-700, 100));
+            factory.CreateUnit(UnitType.Tank, new Vector2(700, 100));
+
+            // assign controller(s) to units
+            // TODO: refactor? this is a little magical
+            Controller p1 = new Controller(PlayerIndex.One, units[0]);
+            controllers.Add(p1);
+
+            // set up the boundry grid (for testing..)
+            grid = new DisplayGrid(GraphicsDevice);
+        }
+
+        /// <summary>
+        /// UnloadContent will be called once per game and is the place to unload
+        /// all content.
+        /// </summary>
+        protected override void UnloadContent()
+        {
+            // TODO: Unload any non ContentManager content here
+        }
+
+        /// <summary>
+        /// Allows the game to run logic such as updating the world,
+        /// checking for collisions, gathering input, and playing audio.
+        /// </summary>
+        /// <param name="gameTime">Provides a snapshot of timing values.</param>
+        protected override void Update(GameTime gameTime)
+        {
+            KeyboardState keyState = Keyboard.GetState();
+
+<<<<<<< .mine
+
+
+            #region ParticleSystem
+                UpdateExplosions(gameTime);
+                //UpdateSmokePlume();
+                //UpdateFire();
+                UpdateProjectiles(gameTime);
+            #endregion
+
+=======
+>>>>>>> .r65
+            #region Keyboard Control
+            if (keyState.IsKeyDown(Keys.W)) { units[0].MoveUnit(new Vector2(0, 1)); }
+            if (keyState.IsKeyDown(Keys.S)) { units[0].MoveUnit(new Vector2(0, -1)); }
+            if (keyState.IsKeyDown(Keys.A)) { units[0].MoveUnit(new Vector2(-1, 0)); }
+            if (keyState.IsKeyDown(Keys.D)) { units[0].MoveUnit(new Vector2(1, 0)); }
+
+            if (keyState.IsKeyDown(Keys.Q)) { units[0].Fire(); }
+
+            if (keyState.IsKeyDown(Keys.Up)) { units[1].MoveUnit(new Vector2(0, 1)); }
+            if (keyState.IsKeyDown(Keys.Down)) { units[1].MoveUnit(new Vector2(0, -1)); }
+            if (keyState.IsKeyDown(Keys.Left)) { units[1].MoveUnit(new Vector2(-1, 0)); }
+            if (keyState.IsKeyDown(Keys.Right)) { units[1].MoveUnit(new Vector2(1, 0)); }
+
+            if (keyState.IsKeyDown(Keys.Escape))
+            {
+                foreach (BaseUnit unit in units) { unit.Reset(); }
+            }
+            #endregion
+
+            #region Gamepad Control
+            state = BeastyStates.Normal;
+            foreach (Controller controller in controllers)
+            {
+                if (controller.Update(gameTime) == ControllerState.Exit) this.Exit();
+                if (controller.paused) { 
+                    state = BeastyStates.Paused;
+                  
+
+                }
+            }
+            #endregion
+
+            #region Units and Camera Update
+            // Updates each unit
+            if(state == BeastyStates.Normal) 
+            {
+                if (projectiles.Count > 0)
+                {
+                    projectiles.RemoveAll(i => i.life <= 0);
+
+                    foreach (BaseUnit projectile in projectiles)
+                    { projectile.Update(gameTime); }
+                }
+
+                foreach (BaseUnit unit in units)
+                { unit.Update(gameTime); }
+
+                // HAHA, ridiculous, no sense of momentum >__<
+                // try using p=mv to conserve momentum, mmmmkay?
+                if (Collider.collides(this.units[0], this.units[1]))
+                {
+                    this.units[0].Collide(this.units[1]);
+                    //this.units[1].Collide(this.units[0]);
+                }
+
+                cameraPosition.Z = Math.Min(7000f, Math.Max(1000f,
+                    Vector2.Distance(units[0].position, units[1].position) * 1.2f));
+                cameraLookAt.X = (units[0].position.X + units[1].position.X) / 2;
+                cameraLookAt.Y = (units[0].position.Y + units[1].position.Y) / 2;
+                cameraPosition.X = cameraLookAt.X;
+                cameraPosition.Y = cameraLookAt.Y;
+
+                base.Update(gameTime);
+            }
+            #endregion
+        }
+
+        #region Reset Render States
+        /// <summary>
+        /// Helper function for setting renderstates back to normal.
+        /// </summary>
+        void SetDefaultRenderState(RenderState renderState)
+        {
+            // Enable point sprites.
+            renderState.PointSpriteEnable = true;
+            renderState.PointSizeMax = 256;
+
+            // Set the alpha blend mode.
+            renderState.AlphaBlendEnable = false;
+
+            // Set the alpha test mode.
+            renderState.AlphaTestEnable = false;
+
+            // Enable the depth buffer (so particles will not be visible through
+            // solid objects like the ground plane), but disable depth writes
+            // (so particles will not obscure other particles).
+            renderState.DepthBufferEnable = true;
+            renderState.DepthBufferWriteEnable = false;
+
+            renderState.CullMode = CullMode.CullCounterClockwiseFace;
+        }
+<<<<<<< .mine
+
+
+        /// <summary>
+        /// Helper for updating the smoke plume effect.
+        /// </summary>
+        void UpdateSmokePlume()
+        {
+            // This is trivial: we just create one new smoke particle per frame.
+            smokePlumeParticles.AddParticle(Vector3.Zero, Vector3.Zero);
+        }
+
+
+        /// <summary>
+        /// Helper for updating the fire effect.
+        /// </summary>
+        /***
+        void UpdateFire()
+        {
+            const int fireParticlesPerFrame = 10;
+
+            // Create a number of fire particles, randomly positioned around a circle.
+            for (int i = 0; i < fireParticlesPerFrame; i++)
+            {
+                fireParticles.AddParticle(RandomPointOnCircle(), Vector3.Zero);
+            }
+
+            // Create one smoke particle per frmae, too.
+            smokePlumeParticles.AddParticle(RandomPointOnCircle(), Vector3.Zero);
+        }
+
+
+
+        /// <summary>
+        /// Helper used by the UpdateFire method. Chooses a random location
+        /// around a circle, at which a fire particle will be created.
+        /// </summary>
+        Vector3 RandomPointOnCircle()
+        {
+            const float radius = 30;
+            const float height = 40;
+
+            double angle = random.NextDouble() * Math.PI * 2;
+
+            float x = (float)Math.Cos(angle);
+            float y = (float)Math.Sin(angle);
+
+            return new Vector3(x * radius, y * radius + height, 0);
+        }
+                ***/
+=======
+>>>>>>> .r65
+        #endregion
+
+        /// <summary>
+        /// This is called when the game should draw itself.
+        /// </summary>
+        /// <param name="gameTime">Provides a snapshot of timing values.</param>
+        /// 
+
+        // Set the position of the camera in world space, for our view matrix.
+        Vector3 cameraPosition = new Vector3(0f, 50f, 5000f);
+        Vector3 cameraLookAt = new Vector3();
+        ///------------------
+
+        protected override void Draw(GameTime gameTime)
+        {
+            GraphicsDevice.Clear(Color.CornflowerBlue);
+
+<<<<<<< .mine
+            Matrix viewTemp = Matrix.CreateLookAt(
+                cameraPosition,
+                cameraLookAt,
+                Vector3.Up);
+=======
+            Matrix view = Matrix.CreateLookAt(
+                cameraPosition,
+                cameraLookAt,
+                Vector3.Up);
+>>>>>>> .r65
+
+<<<<<<< .mine
+            Matrix projectionTemp = Matrix.CreatePerspectiveFieldOfView(
+                MathHelper.ToRadians(45.0f),
+                aspectRatio, 1.0f, 50000.0f);
+=======
+            Matrix projection = Matrix.CreatePerspectiveFieldOfView(
+                MathHelper.ToRadians(45.0f),
+                aspectRatio, 1.0f, 50000.0f);
+>>>>>>> .r65
+
+<<<<<<< .mine
+=======
+            // SetDefaultRenderState(device.RenderState);                
+>>>>>>> .r65
+
+<<<<<<< .mine
+=======
+            // draw each unit
+            foreach (BaseUnit unit in this.units)
+            { unit.Draw(projection, view); }
+
+>>>>>>> .r65
+<<<<<<< .mine
+            // Pass camera matrices through to the particle system components.
+            explosionParticles.SetCamera(viewTemp, projectionTemp);
+            explosionSmokeParticles.SetCamera(viewTemp, projectionTemp);
+            projectileTrailParticles.SetCamera(viewTemp, projectionTemp);
+            smokePlumeParticles.SetCamera(viewTemp, projectionTemp);
+            fireParticles.SetCamera(viewTemp, projectionTemp);
+
+            #endregion
+=======
+            foreach (BaseUnit projectile in this.projectiles)
+            { projectile.Draw(projection, view); }
+>>>>>>> .r65
+
+<<<<<<< .mine
+            #region Toon Shading
+            #region NormalDepthAlpha
+
+            graphics.GraphicsDevice.SetRenderTarget(0, normalDepthAlphaTarget);
+            graphics.GraphicsDevice.Clear(Color.White);
+            graphics.GraphicsDevice.RenderState.AlphaBlendEnable = false;
+            graphics.GraphicsDevice.RenderState.AlphaTestEnable = false;
+            graphics.GraphicsDevice.RenderState.DepthBufferEnable = true;
+
+            renderEffect.Parameters["World"].SetValue(Matrix.CreateRotationX(-(float)Math.PI / 2.0f));
+            renderEffect.Parameters["View"].SetValue(camera.View);
+            renderEffect.Parameters["Projection"].SetValue(camera.Projection);
+            renderEffect.CurrentTechnique = renderEffect.Techniques["NormalDepth"];
+
+            foreach (ModelMesh meshes in trooper.Meshes)
+            {
+                foreach (ModelMeshPart parts in meshes.MeshParts)
+                    parts.Effect = renderEffect;
+                meshes.Draw();
+            }
+
+            #endregion
+
+            #region Render
+
+            graphics.GraphicsDevice.SetRenderTarget(0, sceneTarget);
+            graphics.GraphicsDevice.Clear(Color.CornflowerBlue);
+            graphics.GraphicsDevice.RenderState.AlphaBlendEnable = false;
+            graphics.GraphicsDevice.RenderState.AlphaTestEnable = false;
+            graphics.GraphicsDevice.RenderState.DepthBufferEnable = true;
+
+            renderEffect.Parameters["World"].SetValue(Matrix.CreateRotationX(-(float)Math.PI / 2.0f));
+            renderEffect.Parameters["View"].SetValue(camera.View);
+            renderEffect.Parameters["Projection"].SetValue(camera.Projection);
+            renderEffect.Parameters["Intesity"].SetValue(lightIntensityTex);
+            if (renderCelShading)
+                renderEffect.CurrentTechnique = renderEffect.Techniques["Toon"];
+            else
+                renderEffect.CurrentTechnique = renderEffect.Techniques["Lambert"];
+
+            foreach (ModelMesh meshes in trooper.Meshes)
+            {
+                foreach (ModelMeshPart parts in meshes.MeshParts)
+                {
+                    renderEffect.Parameters["Texture"].SetValue(trooperTex);
+                    parts.Effect = renderEffect;
+                }
+                meshes.Draw();
+            }
+
+            if (renderGeometryEdges && renderCelShading && SM30Supported)
+            {
+                graphics.GraphicsDevice.RenderState.CullMode = CullMode.CullClockwiseFace;
+                renderEffect.Parameters["World"].SetValue(Matrix.CreateRotationX(-(float)Math.PI / 2.0f));
+                renderEffect.Parameters["Offset"].SetValue(vertexOffset);
+                renderEffect.Parameters["RandomTex"].SetValue(randNumbersTex);
+                renderEffect.CurrentTechnique = renderEffect.Techniques["Black"];
+                foreach (ModelMesh meshes in trooper.Meshes)
+                {
+                    foreach (ModelMeshPart parts in meshes.MeshParts)
+                    {
+                        renderEffect.Parameters["Texture"].SetValue(trooperTex);
+                        parts.Effect = renderEffect;
+                    }
+                    meshes.Draw();
+                }
+                graphics.GraphicsDevice.RenderState.CullMode = CullMode.CullCounterClockwiseFace;
+            }
+
+            #endregion
+
+            #region PostProcessing
+
+            graphics.GraphicsDevice.SetRenderTarget(0, null);
+            graphics.GraphicsDevice.Clear(Color.CornflowerBlue);
+            postprocessEffect.Parameters["PencilTex"].SetValue(pencilTex);
+            postprocessEffect.Parameters["TexOffset"].SetValue(offset);
+            postprocessEffect.Parameters["ScreenResolution"].SetValue(new Vector2(sceneTarget.Width,
+                                                                                    sceneTarget.Height));
+            postprocessEffect.Parameters["NormalDepthTexture"].SetValue(normalDepthAlphaTarget.GetTexture());
+            if (renderEdgeDetection)
+                postprocessEffect.CurrentTechnique = postprocessEffect.Techniques["EdgeDetect"];
+            else
+                postprocessEffect.CurrentTechnique = postprocessEffect.Techniques["NoEdgeDetect"];
+            if (!renderCelShading)
+                postprocessEffect.CurrentTechnique = postprocessEffect.Techniques["NoCel"];
+
+            spriteBatch.Begin(SpriteBlendMode.None,
+                              SpriteSortMode.Immediate,
+                              SaveStateMode.None);
+
+            postprocessEffect.Begin();
+            postprocessEffect.CurrentTechnique.Passes[0].Begin();
+
+            spriteBatch.Draw(sceneTarget.GetTexture(), Vector2.Zero, Color.White);
+
+            spriteBatch.End();
+
+            postprocessEffect.CurrentTechnique.Passes[0].End();
+            postprocessEffect.End();
+
+            #endregion
+            #endregion
+
+            if (controllers.Exists(i => i.disconnected))
+            {
+                spriteBatch.Begin(SpriteBlendMode.AlphaBlend, SpriteSortMode.BackToFront, SaveStateMode.SaveState);
+                string output = "Please reconnect the Game Pad";
+=======
+            // landtest.Draw();
+            grid.Draw(projection, view);
+>>>>>>> .r65
+
+            switch (state)
+            {
+                case BeastyStates.Paused :
+                    messages.Draw("paused");
+                    break;
+                default:
+                    break;
+            }
+
+
+            foreach (UserUnit unit in units)
+            {
+                // Draw 2d messages...
+                Vector3 pos = device.Viewport.Project(new Vector3(unit.position.X, unit.position.Y - 100, 0f), projection, view, Matrix.Identity);
+                float scale = 1000 / Vector3.Distance(cameraPosition, new Vector3(unit.position, 0));
+                messages.Draw(pos, scale, "Energy:" + unit.energy + "\nLife:" + unit.life);
+            }
+
+            base.Draw(gameTime);
+
+<<<<<<< .mine
+                GraphicsDevice.Clear(Color.CornflowerBlue);
+                device.RenderState.AlphaBlendEnable = false;
+
+
+                // draw each unit
+                foreach (BaseUnit unit in this.units)
+                { unit.Draw(projectionTemp, viewTemp); }
+
+                foreach (BaseUnit projectile in this.projectiles)
+                { projectile.Draw(projectionTemp, viewTemp); }
+
+                grid.Draw(projectionTemp, viewTemp);
+
+                base.Draw(gameTime);
+            }
+=======
+>>>>>>> .r65
+        }
+    }
+}

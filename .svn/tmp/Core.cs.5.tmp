@@ -1,0 +1,513 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.GamerServices;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
+using Microsoft.Xna.Framework.Net;
+using Microsoft.Xna.Framework.Storage;
+
+namespace Beasty
+{
+
+    /// <summary>
+    /// This is the main type for your game
+    /// </summary>
+    public class Core : Microsoft.Xna.Framework.Game
+    {
+        GraphicsDevice device;
+        GraphicsDeviceManager graphics;
+        SpriteBatch spriteBatch;
+
+#region ParticleSystem Field
+        //ParticleSystem
+        ParticleSystem explosionParticles;
+        ParticleSystem explosionSmokeParticles;
+        ParticleSystem projectileTrailParticles;
+        ParticleSystem smokePlumeParticles;
+        ParticleSystem fireParticles;
+
+        // The sample can switch between three different visual effects.
+        enum ParticleState
+        {
+            Explosions,
+            SmokePlume,
+            RingOfFire,
+        };
+
+        // The explosions effect works by firing projectiles up into the
+        // air, so we need to keep track of all the active projectiles.
+        List<Projectile> projectilesSystemList = new List<Projectile>();
+
+        TimeSpan timeToNextProjectile = TimeSpan.Zero;
+
+
+        // Random number generator for the fire effect.
+        //Random random = new Random();
+
+#endregion
+
+
+
+        // The aspect ratio determines how to scale 3d to 2d projection.
+        float aspectRatio;
+
+        GamePadState lastGamePadState = new GamePadState();
+        GamePadState currentGamePadState = new GamePadState();
+
+        SpriteFont msgFont;
+        Vector2 msgFontPos;
+
+        private bool paused = false;
+
+        // a list of controllers
+        private List<Controller> controllers = new List<Controller>();
+
+        // list of drawable units, projectiles, misc.
+        private List<BaseUnit> units = new List<BaseUnit>();
+        private List<BaseUnit> projectiles = new List<BaseUnit>();
+
+        // Grid and boundary
+        private DisplayGrid grid;       
+
+        // A shared random number generator
+        private static Random random = new Random();
+        public static Random Random
+        {
+            get { return random; }
+        }
+
+        public Core()
+        {
+            graphics = new GraphicsDeviceManager(this);
+            //TODO double buffering
+            graphics.PreferredBackBufferWidth = 853;
+            graphics.PreferredBackBufferHeight = 480;
+            graphics.PreferMultiSampling = true;
+            /**
+            graphics.PreparingDeviceSettings +=
+                  new EventHandler<PreparingDeviceSettingsEventArgs>(
+                      graphics_PreparingDeviceSettings);
+            **/
+            Content.RootDirectory = "Content";
+        }
+
+        #region Preparing for Anti-Aliasing
+        private void graphics_PreparingDeviceSettings(object sender, PreparingDeviceSettingsEventArgs e)
+        {
+            // Xbox 360 and most PCs support FourSamples/0 
+            // (4x) and TwoSamples/0 (2x) antialiasing.
+            PresentationParameters pp = e.GraphicsDeviceInformation.PresentationParameters;
+#if XBOX
+            pp.MultiSampleQuality = 0;
+            pp.MultiSampleType = MultiSampleType.FourSamples;
+            return;
+#else
+            int quality = 0;
+            GraphicsAdapter adapter = e.GraphicsDeviceInformation.Adapter;
+            SurfaceFormat format = adapter.CurrentDisplayMode.Format;
+            // Check for 4xAA
+            if (adapter.CheckDeviceMultiSampleType(DeviceType.Hardware, format,
+                false, MultiSampleType.FourSamples, out quality))
+            {
+                // even if a greater quality is returned, we only want quality 0
+                pp.MultiSampleQuality = 0;
+                pp.MultiSampleType =
+                    MultiSampleType.FourSamples;
+            }
+            // Check for 2xAA
+            else if (adapter.CheckDeviceMultiSampleType(DeviceType.Hardware,
+                format, false, MultiSampleType.TwoSamples, out quality))
+            {
+                // even if a greater quality is returned, we only want quality 0
+                pp.MultiSampleQuality = 0;
+                pp.MultiSampleType =
+                    MultiSampleType.TwoSamples;
+            }
+            return;
+#endif
+        }
+        #endregion
+
+        /// <summary>
+        /// Allows the game to perform any initialization it needs to before starting to run.
+        /// This is where it can query for any required services and load any non-graphic
+        /// related content.  Calling base.Initialize will enumerate through any components
+        /// and initialize them as well.
+        /// </summary>
+        protected override void Initialize()
+        {
+            #region ParticleSystem Initialize
+            // Construct our particle system components.
+            explosionParticles = new Beasty.ParticleSystems.ExplosionParticleSystem(this, Content);
+            explosionSmokeParticles = new Beasty.ParticleSystems.ExplosionSmokeParticleSystem(this, Content);
+            projectileTrailParticles = new Beasty.ParticleSystems.ProjectileTrailParticleSystem(this, Content);
+            smokePlumeParticles = new Beasty.ParticleSystems.SmokePlumeParticleSystem(this, Content);
+            fireParticles = new Beasty.ParticleSystems.FireParticleSystem(this, Content);
+
+            // Set the draw order so the explosions and fire
+            // will appear over the top of the smoke.
+            smokePlumeParticles.DrawOrder = 100;
+            explosionSmokeParticles.DrawOrder = 200;
+            projectileTrailParticles.DrawOrder = 300;
+            explosionParticles.DrawOrder = 400;
+            fireParticles.DrawOrder = 500;
+
+            // Register the particle system components.
+            Components.Add(explosionParticles);
+            Components.Add(explosionSmokeParticles);
+            Components.Add(projectileTrailParticles);
+            Components.Add(smokePlumeParticles);
+            Components.Add(fireParticles);
+            #endregion
+
+            device = graphics.GraphicsDevice;
+            
+
+            
+
+            base.Initialize();
+        }
+
+        /// <summary>
+        /// LoadContent will be called once per game and is the place to load
+        /// all of your content.
+        /// </summary>
+        /// 
+        protected override void LoadContent()
+        {
+            // Create a new SpriteBatch, which can be used to draw textures.
+            spriteBatch = new SpriteBatch(GraphicsDevice);
+            aspectRatio = graphics.GraphicsDevice.Viewport.AspectRatio;
+
+            // Load font for messages
+            msgFont = this.Content.Load<SpriteFont>("msg");
+            msgFontPos = new Vector2(graphics.GraphicsDevice.Viewport.Width / 2,
+                graphics.GraphicsDevice.Viewport.Height / 2);
+
+            // TODO: Menu system for creating units
+            // create factory to produce units
+            AbstractUnitFactory factory = new ConcreteUnitFactory(Content, units, projectiles);
+
+            // create our two units
+            factory.CreateUnit(UnitType.Pigeon, new Vector2(-700, 100));
+            factory.CreateUnit(UnitType.Tank, new Vector2(700, 100));
+
+            // TODO: refactor, this is a little magical
+            Controller p1 = new Controller(PlayerIndex.One, units[0]);
+            controllers.Add(p1);
+
+            grid = new DisplayGrid(GraphicsDevice);
+ 
+        }
+
+        /// <summary>
+        /// UnloadContent will be called once per game and is the place to unload
+        /// all content.
+        /// </summary>
+        protected override void UnloadContent()
+        {
+            // TODO: Unload any non ContentManager content here
+        }
+
+        /// <summary>
+        /// Allows the game to run logic such as updating the world,
+        /// checking for collisions, gathering input, and playing audio.
+        /// </summary>
+        /// <param name="gameTime">Provides a snapshot of timing values.</param>
+        protected override void Update(GameTime gameTime)
+        {
+            KeyboardState keyState = Keyboard.GetState();
+
+
+<<<<<<< .mine
+            #region ParticleSystem
+                UpdateExplosions(gameTime);
+                UpdateSmokePlume();
+                UpdateFire();
+                UpdateProjectiles(gameTime);
+            #endregion
+
+            #region Gamepad Control
+            if (usingGamePad == true)
+            {
+                lastGamePadState = currentGamePadState;
+                currentGamePadState = GamePad.GetState(PlayerIndex.One);
+                if (currentGamePadState.IsConnected == false) { disconnected = true; }
+                else if (currentGamePadState.IsConnected == true) { disconnected = false; }
+
+                // Allows the game to exit
+                if (currentGamePadState.Buttons.Back == ButtonState.Pressed)
+                    this.Exit();
+                if (currentGamePadState.Buttons.Start == ButtonState.Pressed && lastGamePadState.Buttons.Start == ButtonState.Released)
+                {
+                    if (paused == true)
+                        paused = false;
+                    else
+                        paused = true;
+                }
+                if (!paused)
+                    units[0].Move(new Vector2(10 * currentGamePadState.ThumbSticks.Left.X,
+                    10 * currentGamePadState.ThumbSticks.Left.Y));
+
+            }
+            #endregion
+
+=======
+>>>>>>> .r58
+            #region Keyboard Control
+            if (keyState.IsKeyDown(Keys.W)) { units[0].Move(new Vector2(0, 1)); }
+            if (keyState.IsKeyDown(Keys.S)) { units[0].Move(new Vector2(0, -1)); }
+            if (keyState.IsKeyDown(Keys.A)) { units[0].Move(new Vector2(-1, 0)); }
+            if (keyState.IsKeyDown(Keys.D)) { units[0].Move(new Vector2(1, 0)); }
+
+            if (keyState.IsKeyDown(Keys.Q)) { units[0].Fire(); }
+
+            if (keyState.IsKeyDown(Keys.Up)) { units[1].Move(new Vector2(0, 1)); }
+            if (keyState.IsKeyDown(Keys.Down)) { units[1].Move(new Vector2(0, -1)); }
+            if (keyState.IsKeyDown(Keys.Left)) { units[1].Move(new Vector2(-1, 0)); }
+            if (keyState.IsKeyDown(Keys.Right)) { units[1].Move(new Vector2(1, 0)); }
+
+            if (keyState.IsKeyDown(Keys.Escape))
+            {
+                foreach (BaseUnit unit in units) { unit.Reset(); }
+            }
+            #endregion
+
+            #region Gamepad Control
+            paused = false;
+            foreach (Controller controller in controllers)
+            {
+                if (controller.Update() == ControlState.Exit) this.Exit();
+                if (controller.paused) paused = true;
+            }
+            #endregion
+
+            #region Units and Camera Update
+            // Updates each unit
+            if (!paused)
+            {
+                if (projectiles.Count > 0)
+                {
+                    projectiles.RemoveAll(i => i.life <= 0);
+
+                    foreach (BaseUnit projectile in projectiles)
+                    { projectile.Update(gameTime); }
+                }
+
+                foreach (BaseUnit unit in units)
+                { unit.Update(gameTime); }
+
+                // HAHA, ridiculous, no sense of momentum >__<
+                // try using p=mv to conserve momentum, mmmmkay?
+                if (Collider.collides(this.units[0], this.units[1]))
+                {
+                    this.units[0].Collide(this.units[1]);
+                    this.units[1].Collide(this.units[0]);
+                }
+
+                base.Update(gameTime);
+
+
+                cameraPosition.Z = Math.Min(7000f, Math.Max(1000f,
+                    Vector2.Distance(units[0].position, units[1].position) * 1.2f));
+                cameraLookAt.X = (units[0].position.X + units[1].position.X) / 2;
+                cameraLookAt.Y = (units[0].position.Y + units[1].position.Y) / 2;
+                cameraPosition.X = cameraLookAt.X;
+                cameraPosition.Y = cameraLookAt.Y;
+            }
+            #endregion
+        }
+
+        #region ParticleSystem Helper Functions
+        /// <summary>
+        /// Helper for updating the explosions effect.
+        /// </summary>
+        void UpdateExplosions(GameTime gameTime)
+        {
+            timeToNextProjectile -= gameTime.ElapsedGameTime;
+
+            if (timeToNextProjectile <= TimeSpan.Zero)
+            {
+                // Create a new projectile once per second. The real work of moving
+                // and creating particles is handled inside the Projectile class.
+                projectilesSystemList.Add(new Projectile(explosionParticles,
+                                               explosionSmokeParticles,
+                                               projectileTrailParticles));
+
+                timeToNextProjectile += TimeSpan.FromSeconds(1);
+            }
+        }
+
+
+        /// <summary>
+        /// Helper for updating the list of active projectiles.
+        /// </summary>
+        void UpdateProjectiles(GameTime gameTime)
+        {
+            int i = 0;
+
+            while (i < projectilesSystemList.Count)
+            {
+                if (!projectilesSystemList[i].Update(gameTime))
+                {
+                    // Remove projectiles at the end of their life.
+                    projectilesSystemList.RemoveAt(i);
+                }
+                else
+                {
+                    // Advance to the next projectile.
+                    i++;
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Helper for updating the smoke plume effect.
+        /// </summary>
+        void UpdateSmokePlume()
+        {
+            // This is trivial: we just create one new smoke particle per frame.
+            smokePlumeParticles.AddParticle(Vector3.Zero, Vector3.Zero);
+        }
+
+
+        /// <summary>
+        /// Helper for updating the fire effect.
+        /// </summary>
+        void UpdateFire()
+        {
+            const int fireParticlesPerFrame = 20;
+
+            // Create a number of fire particles, randomly positioned around a circle.
+            for (int i = 0; i < fireParticlesPerFrame; i++)
+            {
+                fireParticles.AddParticle(RandomPointOnCircle(), Vector3.Zero);
+            }
+
+            // Create one smoke particle per frmae, too.
+            smokePlumeParticles.AddParticle(RandomPointOnCircle(), Vector3.Zero);
+        }
+
+
+        /// <summary>
+        /// Helper used by the UpdateFire method. Chooses a random location
+        /// around a circle, at which a fire particle will be created.
+        /// </summary>
+        Vector3 RandomPointOnCircle()
+        {
+            const float radius = 30;
+            const float height = 40;
+
+            double angle = random.NextDouble() * Math.PI * 2;
+
+            float x = (float)Math.Cos(angle);
+            float y = (float)Math.Sin(angle);
+
+            return new Vector3(x * radius, y * radius + height, 0);
+        }
+
+        #endregion
+
+
+        /// <summary>
+        /// This is called when the game should draw itself.
+        /// </summary>
+        /// <param name="gameTime">Provides a snapshot of timing values.</param>
+        /// 
+
+        // Set the position of the camera in world space, for our view matrix.
+        Vector3 cameraPosition = new Vector3(0f, 50f, 5000f);
+        Vector3 cameraLookAt = new Vector3();
+        ///------------------
+
+        protected override void Draw(GameTime gameTime)
+        {
+<<<<<<< .mine
+            #region ParticleSystem Draw
+
+            // Camera state.
+            float cameraArc = -5;
+            float cameraRotation = 0;
+            float cameraDistance = 200;
+
+            // Compute camera matrices.
+            float aspectRatio = (float)device.Viewport.Width /
+                                (float)device.Viewport.Height;
+
+            Matrix viewTemp = Matrix.CreateTranslation(0, -25, 0) *
+                          Matrix.CreateRotationY(MathHelper.ToRadians(cameraRotation)) *
+                          Matrix.CreateRotationX(MathHelper.ToRadians(cameraArc)) *
+                          Matrix.CreateLookAt(new Vector3(0, 0, -cameraDistance),
+                                              new Vector3(0, 0, 0), Vector3.Up);
+
+            Matrix projectionTemp = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4,
+                                                                    aspectRatio,
+                                                                    1, 10000);
+
+            // Pass camera matrices through to the particle system components.
+            explosionParticles.SetCamera(viewTemp, projectionTemp);
+            explosionSmokeParticles.SetCamera(viewTemp, projectionTemp);
+            projectileTrailParticles.SetCamera(viewTemp, projectionTemp);
+            smokePlumeParticles.SetCamera(viewTemp, projectionTemp);
+            fireParticles.SetCamera(viewTemp, projectionTemp);
+            #endregion
+            if (disconnected)
+=======
+            if (controllers.Exists(i => i.disconnected))
+>>>>>>> .r58
+            {
+                spriteBatch.Begin(SpriteBlendMode.AlphaBlend, SpriteSortMode.BackToFront, SaveStateMode.SaveState);
+                string output = "Please reconnect the Game Pad";
+
+                Vector2 FontOrigin = msgFont.MeasureString(output) / 2;
+                spriteBatch.DrawString(msgFont, output, msgFontPos, Color.LightGreen,
+                    0, FontOrigin, 1.0f, SpriteEffects.None, 0.5f);
+
+                spriteBatch.End();
+                paused = true;
+            }
+            else if (paused)
+            {
+                spriteBatch.Begin(SpriteBlendMode.AlphaBlend, SpriteSortMode.BackToFront, SaveStateMode.SaveState);
+                string output = "Game is Paused";
+
+                Vector2 FontOrigin = msgFont.MeasureString(output) / 2;
+                spriteBatch.DrawString(msgFont, output, msgFontPos, Color.LightGreen,
+                    0, FontOrigin, 1.0f, SpriteEffects.None, 0.5f);
+
+                spriteBatch.End();
+            }
+
+            {
+
+                GraphicsDevice.Clear(Color.CornflowerBlue);
+
+                Matrix view = Matrix.CreateLookAt(
+                    cameraPosition,
+                    cameraLookAt,
+                    Vector3.Up);
+
+                Matrix projection = Matrix.CreatePerspectiveFieldOfView(
+                    MathHelper.ToRadians(45.0f),
+                    aspectRatio, 1.0f, 50000.0f);
+
+                // draw each unit
+                foreach (BaseUnit unit in this.units)
+                { unit.Draw(projection, view); }
+
+                foreach (BaseUnit projectile in this.projectiles)
+                { projectile.Draw(projection, view); }
+
+                grid.Draw(projection, view);
+
+                base.Draw(gameTime);
+            }
+        }
+    }
+}

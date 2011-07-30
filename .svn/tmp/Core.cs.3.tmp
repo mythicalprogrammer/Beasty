@@ -1,0 +1,326 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.GamerServices;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
+using Microsoft.Xna.Framework.Net;
+using Microsoft.Xna.Framework.Storage;
+
+namespace Beasty
+{
+
+    /// <summary>
+    /// This is the main type for your game
+    /// </summary>
+    public class Core : Microsoft.Xna.Framework.Game
+    {
+        GraphicsDevice device;
+        GraphicsDeviceManager graphics;
+        SpriteBatch spriteBatch;
+
+        //Particles
+        Particles explosionParticle;
+
+        // The aspect ratio determines how to scale 3d to 2d projection.
+        float aspectRatio;
+
+        GamePadState lastGamePadState = new GamePadState();
+        GamePadState currentGamePadState = new GamePadState();
+
+        SpriteFont msgFont;
+        Vector2 msgFontPos;
+        private bool disconnected = false;
+        private bool usingGamePad = false;
+        private bool paused = false;
+
+        // list of drawable units, projectiles, misc.
+        private List<BaseUnit> units = new List<BaseUnit>();
+        private List<BaseUnit> projectiles = new List<BaseUnit>();
+
+<<<<<<< .working
+
+
+
+=======
+        // Grid and boundary
+        private DisplayGrid grid;       
+
+>>>>>>> .merge-right.r45
+        // A shared random number generator
+        private static Random random = new Random();
+        public static Random Random
+        {
+            get { return random; }
+        }
+
+        public Core()
+        {
+            graphics = new GraphicsDeviceManager(this);
+            graphics.PreferredBackBufferWidth = 853;
+            graphics.PreferredBackBufferHeight = 480;
+            graphics.PreferMultiSampling = true;
+            graphics.PreparingDeviceSettings +=
+                  new EventHandler<PreparingDeviceSettingsEventArgs>(
+                      graphics_PreparingDeviceSettings);
+
+            Content.RootDirectory = "Content";
+        }
+
+        #region Preparing for Anti-Aliasing
+        private void graphics_PreparingDeviceSettings(object sender, PreparingDeviceSettingsEventArgs e)
+        {
+            // Xbox 360 and most PCs support FourSamples/0 
+            // (4x) and TwoSamples/0 (2x) antialiasing.
+            PresentationParameters pp = e.GraphicsDeviceInformation.PresentationParameters;
+#if XBOX
+            pp.MultiSampleQuality = 0;
+            pp.MultiSampleType = MultiSampleType.FourSamples;
+            return;
+#else
+            int quality = 0;
+            GraphicsAdapter adapter = e.GraphicsDeviceInformation.Adapter;
+            SurfaceFormat format = adapter.CurrentDisplayMode.Format;
+            // Check for 4xAA
+            if (adapter.CheckDeviceMultiSampleType(DeviceType.Hardware, format,
+                false, MultiSampleType.FourSamples, out quality))
+            {
+                // even if a greater quality is returned, we only want quality 0
+                pp.MultiSampleQuality = 0;
+                pp.MultiSampleType =
+                    MultiSampleType.FourSamples;
+            }
+            // Check for 2xAA
+            else if (adapter.CheckDeviceMultiSampleType(DeviceType.Hardware,
+                format, false, MultiSampleType.TwoSamples, out quality))
+            {
+                // even if a greater quality is returned, we only want quality 0
+                pp.MultiSampleQuality = 0;
+                pp.MultiSampleType =
+                    MultiSampleType.TwoSamples;
+            }
+            return;
+#endif
+        }
+        #endregion
+
+        /// <summary>
+        /// Allows the game to perform any initialization it needs to before starting to run.
+        /// This is where it can query for any required services and load any non-graphic
+        /// related content.  Calling base.Initialize will enumerate through any components
+        /// and initialize them as well.
+        /// </summary>
+        protected override void Initialize()
+        {
+<<<<<<< .working
+            device = graphics.GraphicsDevice;
+            explosionParticle = new Particles("particles//explosion", "particles//explosionEffect", Content, device);
+=======
+>>>>>>> .merge-right.r45
+            GamePadState currentState = GamePad.GetState(PlayerIndex.One);
+            if (currentState.IsConnected == true) { usingGamePad = true; }
+            base.Initialize();
+        }
+
+        /// <summary>
+        /// LoadContent will be called once per game and is the place to load
+        /// all of your content.
+        /// </summary>
+        /// 
+        protected override void LoadContent()
+        {
+
+            // Create a new SpriteBatch, which can be used to draw textures.
+            spriteBatch = new SpriteBatch(GraphicsDevice);
+            aspectRatio = graphics.GraphicsDevice.Viewport.AspectRatio;
+
+            // Load font for messages
+            msgFont = this.Content.Load<SpriteFont>("msg");
+            msgFontPos = new Vector2(graphics.GraphicsDevice.Viewport.Width / 2,
+                graphics.GraphicsDevice.Viewport.Height / 2);
+
+            // TODO: Menu system for creating units
+            // create factory to produce units
+            AbstractUnitFactory factory = new ConcreteUnitFactory(Content);
+
+            // create our two units
+            BaseUnit p1 = factory.CreateUnit(UnitType.Tank, new Vector2(700, 100));
+            BaseUnit p2 = factory.CreateUnit(UnitType.Pigeon, new Vector2(-700, 100));
+            units.Add(p1);
+            units.Add(p2);
+
+            grid = new DisplayGrid(GraphicsDevice);
+
+
+ 
+        }
+
+        /// <summary>
+        /// UnloadContent will be called once per game and is the place to unload
+        /// all content.
+        /// </summary>
+        protected override void UnloadContent()
+        {
+            // TODO: Unload any non ContentManager content here
+        }
+
+        /// <summary>
+        /// Allows the game to run logic such as updating the world,
+        /// checking for collisions, gathering input, and playing audio.
+        /// </summary>
+        /// <param name="gameTime">Provides a snapshot of timing values.</param>
+        protected override void Update(GameTime gameTime)
+        {
+            KeyboardState keyState = Keyboard.GetState();
+
+            if (keyState.IsKeyDown(Keys.Space))
+                explosionParticle.CreateExplosionVertices((float)gameTime.TotalGameTime.TotalMilliseconds);
+
+            #region Gamepad Control
+            if (usingGamePad == true)
+            {
+                lastGamePadState = currentGamePadState;
+                currentGamePadState = GamePad.GetState(PlayerIndex.One);
+                if (currentGamePadState.IsConnected == false) { disconnected = true; }
+                else if (currentGamePadState.IsConnected == true) { disconnected = false; }
+
+                // Allows the game to exit
+                if (currentGamePadState.Buttons.Back == ButtonState.Pressed)
+                    this.Exit();
+                if (currentGamePadState.Buttons.Start == ButtonState.Pressed && lastGamePadState.Buttons.Start == ButtonState.Released)
+                {
+                    if (paused == true)
+                        paused = false;
+                    else
+                        paused = true;
+                }
+                if (!paused)
+                    units[0].Move(new Vector2(10 * currentGamePadState.ThumbSticks.Left.X,
+                    10 * currentGamePadState.ThumbSticks.Left.Y));
+
+            }
+            #endregion
+
+            #region Keyboard Control
+            else
+            {
+
+                if (keyState.IsKeyDown(Keys.W)) { units[0].Move(new Vector2(0, 1)); }
+                if (keyState.IsKeyDown(Keys.S)) { units[0].Move(new Vector2(0, -1)); }
+                if (keyState.IsKeyDown(Keys.A)) { units[0].Move(new Vector2(-1, 0)); }
+                if (keyState.IsKeyDown(Keys.D)) { units[0].Move(new Vector2(1, 0)); }
+            }
+            if (keyState.IsKeyDown(Keys.Escape))
+            {
+                foreach (BaseUnit unit in units) { unit.Reset(); }
+            }
+            if (keyState.IsKeyDown(Keys.Up)) { units[1].Move(new Vector2(0, 1)); }
+            if (keyState.IsKeyDown(Keys.Down)) { units[1].Move(new Vector2(0, -1)); }
+            if (keyState.IsKeyDown(Keys.Left)) { units[1].Move(new Vector2(-1, 0)); }
+            if (keyState.IsKeyDown(Keys.Right)) { units[1].Move(new Vector2(1, 0)); }
+
+            #endregion
+
+            #region Units and Camera Update
+            // Updates each unit
+            if (!paused)
+            {
+                foreach (BaseUnit unit in units)
+                { unit.Update(); }
+
+                // HAHA, ridiculous, no sense of momentum >__<
+                // try using p=mv to conserve momentum, mmmmkay?
+                if (Collider.collides(this.units[0], this.units[1]))
+                {
+                    this.units[0].Collide(this.units[1]);
+                    this.units[1].Collide(this.units[0]);
+                }
+
+                base.Update(gameTime);
+
+
+                cameraPosition.Z = Math.Min(7000f, Math.Max(1000f,
+                    Vector2.Distance(units[0].position, units[1].position)*1.2f));
+                cameraLookAt.X = (units[0].position.X + units[1].position.X) / 2;
+                cameraLookAt.Y = (units[0].position.Y + units[1].position.Y) / 2;
+                cameraPosition.X = cameraLookAt.X;
+                cameraPosition.Y = cameraLookAt.Y;
+
+                Console.Out.WriteLine(cameraPosition.Z);
+            }
+            #endregion
+        }
+
+        /// <summary>
+        /// This is called when the game should draw itself.
+        /// </summary>
+        /// <param name="gameTime">Provides a snapshot of timing values.</param>
+        /// 
+
+        // Set the position of the camera in world space, for our view matrix.
+        Vector3 cameraPosition = new Vector3(0f, 50f, 5000f);
+        Vector3 cameraLookAt = new Vector3();
+        ///------------------
+
+        protected override void Draw(GameTime gameTime)
+        {
+            if (disconnected)
+            {
+                spriteBatch.Begin();
+                string output = "Please reconnect the Game Pad";
+
+                Vector2 FontOrigin = msgFont.MeasureString(output) / 2;
+                spriteBatch.DrawString(msgFont, output, msgFontPos, Color.LightGreen,
+                    0, FontOrigin, 1.0f, SpriteEffects.None, 0.5f);
+
+                spriteBatch.End();
+            }
+            else if (paused)
+            {
+                spriteBatch.Begin(SpriteBlendMode.AlphaBlend, SpriteSortMode.BackToFront, SaveStateMode.None);
+                //spriteBatch.Begin();
+
+                string output = "Game is Paused";
+
+                Vector2 FontOrigin = msgFont.MeasureString(output) / 2;
+                spriteBatch.DrawString(msgFont, output, msgFontPos, Color.LightGreen,
+                    0, FontOrigin, 1.0f, SpriteEffects.None, 0.5f);
+
+                spriteBatch.End();
+            }
+            else
+            {
+                
+                GraphicsDevice.Clear(Color.CornflowerBlue);
+
+<<<<<<< .working
+
+=======
+                Matrix view = Matrix.CreateLookAt(
+                    cameraPosition,
+                    cameraLookAt,
+                    Vector3.Up);
+
+                Matrix projection = Matrix.CreatePerspectiveFieldOfView(
+                    MathHelper.ToRadians(45.0f),
+                    aspectRatio, 1.0f, 50000.0f);
+
+>>>>>>> .merge-right.r45
+                // draw each unit
+                foreach (BaseUnit unit in this.units)
+                { unit.Draw(projection, view); }
+                grid.Draw(projection, view);               
+
+                explosionParticle.DrawExplosion(gameTime);
+
+
+
+                base.Draw(gameTime);
+            }
+        }
+    }
+}
